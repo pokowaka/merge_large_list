@@ -46,7 +46,7 @@ module Mergelist
       val
     end
 
-    private 
+    private
 
     # parent <= left(parent) && parent <= right(parent)
     def min_heapify(idx)
@@ -77,8 +77,48 @@ module Mergelist
       @list[idx-1]
     end
 
-    def swap(fst, snd) 
+    def swap(fst, snd)
       @list[fst-1], @list[snd-1] = @list[snd-1], @list[fst-1]
+    end
+  end
+
+  class Pair
+    attr_reader :fst, :snd
+    include Comparable
+
+    def initialize(fst, snd)
+      @fst = fst
+      @snd = snd
+    end
+
+    def <=>(anOther)
+      fst <=> anOther.fst
+    end
+  end
+
+  class Merger
+
+    # Note: lists can be streams, but must support
+    # first, shift && empty
+    # result must support append
+    def self.merge(lists, result)
+      heap = MinHeap.new
+      lists.each_with_index { |l, idx| heap.insert(Pair.new(l.first, idx)) }
+      while(heap.size > 0)
+        pair = heap.extract_min
+        idx = pair.snd
+        list = lists[idx]
+        result.push(pair.fst)
+        list.shift
+        heap.insert(Pair.new(list.first, idx)) unless list.empty?
+      end
+      result
+    end
+
+    def self.mergelists(lists)
+      result = []
+      merge(lists, result)
+      result
     end
   end
 end
